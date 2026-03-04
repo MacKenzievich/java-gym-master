@@ -4,17 +4,24 @@ import java.util.*;
 
 public class Timetable {
 
-    private /* как это хранить??? */ timetable;
+    private HashMap<DayOfWeek, TreeMap<TimeOfDay, ArrayList<TrainingSession>>> timetable = new HashMap<>();
 
     public void addNewTrainingSession(TrainingSession trainingSession) {
-        //сохраняем занятие в расписании
+        ArrayList<TrainingSession> listTrainingSession = new ArrayList<>(); // Список для тренировок
+        listTrainingSession.add(trainingSession); // добавили тренировку в список
+
+        TreeMap<TimeOfDay, ArrayList<TrainingSession>> timeTraining = new TreeMap<>(); // мапа для списка тренировок
+        timeTraining.put(trainingSession.getTimeOfDay(), listTrainingSession); // добавили в мапу список
+
+        timetable.put(trainingSession.getDayOfWeek(), timeTraining);
     }
 
-    public /* непонятно, что возвращать */ getTrainingSessionsForDay(DayOfWeek dayOfWeek) {
-        //как реализовать, тоже непонятно, но сложность должна быть О(1)
+    public TreeMap<TimeOfDay, ArrayList<TrainingSession>> getTrainingSessionsForDay(DayOfWeek dayOfWeek) {
+        return timetable.getOrDefault(dayOfWeek, new TreeMap<>());
     }
 
-    public /* непонятно, что возвращать */ getTrainingSessionsForDayAndTime(DayOfWeek dayOfWeek, TimeOfDay timeOfDay) {
-        //как реализовать, тоже непонятно, но сложность должна быть О(1)
+    public ArrayList<TrainingSession> getTrainingSessionsForDayAndTime(DayOfWeek dayOfWeek, TimeOfDay timeOfDay) {
+        TreeMap<TimeOfDay, ArrayList<TrainingSession>> map = timetable.getOrDefault(dayOfWeek, new TreeMap<>()); // для того чтобы небыло NULL
+        return map.getOrDefault(timeOfDay, new ArrayList<>()); // чтобы не было исключения.
     }
 }
