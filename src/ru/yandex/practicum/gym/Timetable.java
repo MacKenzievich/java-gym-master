@@ -6,15 +6,29 @@ public class Timetable {
 
     private HashMap<DayOfWeek, TreeMap<TimeOfDay, ArrayList<TrainingSession>>> timetable = new HashMap<>();
 
-    public void addNewTrainingSession(TrainingSession trainingSession) {
-        ArrayList<TrainingSession> listTrainingSession = new ArrayList<>(); // Список для тренировок
-        listTrainingSession.add(trainingSession); // добавили тренировку в список
+    public void addNewTrainingSession(TrainingSession trainingSession) { // переделать
 
-        TreeMap<TimeOfDay, ArrayList<TrainingSession>> dayMap = new TreeMap<>(); // мапа для списка тренировок
-        dayMap.put(trainingSession.getTimeOfDay(), listTrainingSession); // добавили в мапу список
+        if (!timetable.containsKey(trainingSession.getDayOfWeek())) {
+            TreeMap<TimeOfDay, ArrayList<TrainingSession>> dayMap = new TreeMap<>();
+            ArrayList<TrainingSession> trainingList = new ArrayList<>();
 
-        timetable.put(trainingSession.getDayOfWeek(), dayMap);
+            trainingList.add(trainingSession);
+            dayMap.put(trainingSession.getTimeOfDay(), trainingList);
+            timetable.put(trainingSession.getDayOfWeek(), dayMap);
+
+        } else {
+            TreeMap<TimeOfDay, ArrayList<TrainingSession>> dayMap = timetable.get(trainingSession.getDayOfWeek());
+            if (!dayMap.containsKey(trainingSession.getTimeOfDay())) {
+                ArrayList<TrainingSession> trainingList = new ArrayList<>();
+                trainingList.add(trainingSession);
+                dayMap.put(trainingSession.getTimeOfDay(), trainingList);
+            } else {
+                ArrayList<TrainingSession> trainingList = dayMap.get(trainingSession.getTimeOfDay());
+                trainingList.add(trainingSession);
+            }
+        }
     }
+
 
     public TreeMap<TimeOfDay, ArrayList<TrainingSession>> getTrainingSessionsForDay(DayOfWeek dayOfWeek) {
         return timetable.getOrDefault(dayOfWeek, new TreeMap<>());
