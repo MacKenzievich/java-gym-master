@@ -4,49 +4,50 @@ import java.util.*;
 
 public class Timetable {
 
-    private HashMap<DayOfWeek, TreeMap<TimeOfDay, ArrayList<TrainingSession>>> timetable = new HashMap<>();
+    private Map<DayOfWeek, Map<TimeOfDay, List<TrainingSession>>> timetable;
 
-    public void addNewTrainingSession(TrainingSession trainingSession) { // переделать
-
-        if (!timetable.containsKey(trainingSession.getDayOfWeek())) {
-            TreeMap<TimeOfDay, ArrayList<TrainingSession>> dayMap = new TreeMap<>();
-            ArrayList<TrainingSession> trainingList = new ArrayList<>();
-
-            trainingList.add(trainingSession);
-            dayMap.put(trainingSession.getTimeOfDay(), trainingList);
-            timetable.put(trainingSession.getDayOfWeek(), dayMap);
-
-        } else {
-            TreeMap<TimeOfDay, ArrayList<TrainingSession>> dayMap = timetable.get(trainingSession.getDayOfWeek());
-            if (!dayMap.containsKey(trainingSession.getTimeOfDay())) {
-                ArrayList<TrainingSession> trainingList = new ArrayList<>();
-                trainingList.add(trainingSession);
-                dayMap.put(trainingSession.getTimeOfDay(), trainingList);
-            } else {
-                ArrayList<TrainingSession> trainingList = dayMap.get(trainingSession.getTimeOfDay());
-                trainingList.add(trainingSession);
-            }
+    public Timetable() {
+        timetable = new HashMap<>();
+        for (DayOfWeek day : DayOfWeek.values()) {
+            timetable.put(day, new TreeMap<>());
         }
+    }   /* По заданию алгоритмическая сложность должна быть O(1).
+        Если использовать TreeMap О(log n), не соблюдение ТЗ.
+        Так же не нашел в задании, для чего нужна сортировка по дням.
+        И все методы получения всегда имеют аргументы в виде ключа.*/
+
+
+    public void addNewTrainingSession(TrainingSession trainingSession) {
+        Map<TimeOfDay, List<TrainingSession>> dayMap =
+                timetable.computeIfAbsent(trainingSession.getDayOfWeek(), k -> new TreeMap<>());
+
+        List<TrainingSession> trainingList =
+                dayMap.computeIfAbsent(trainingSession.getTimeOfDay(), k -> new ArrayList<>());
+        trainingList.add(trainingSession);
     }
 
 
-    public TreeMap<TimeOfDay, ArrayList<TrainingSession>> getTrainingSessionsForDay(DayOfWeek dayOfWeek) {
-        return timetable.getOrDefault(dayOfWeek, new TreeMap<>());
+    public List<TrainingSession> getTrainingSessionsForDay(DayOfWeek dayOfWeek) {
+        Map<TimeOfDay, List<TrainingSession>> map = timetable.get(dayOfWeek);
+        List<TrainingSession> trainingSessionList = new ArrayList<>();
+        map.forEach((key, value) -> trainingSessionList.addAll(value));
+        Collections.sort(trainingSessionList);
+        return trainingSessionList;
     }
 
-    public ArrayList<TrainingSession> getTrainingSessionsForDayAndTime(DayOfWeek dayOfWeek, TimeOfDay timeOfDay) {
-        TreeMap<TimeOfDay, ArrayList<TrainingSession>> map = timetable.getOrDefault(dayOfWeek, new TreeMap<>()); // для того чтобы небыло NULL
+    public List<TrainingSession> getTrainingSessionsForDayAndTime(DayOfWeek dayOfWeek, TimeOfDay timeOfDay) {
+        Map<TimeOfDay, List<TrainingSession>> map = timetable.getOrDefault(dayOfWeek, new TreeMap<>());
         return map.getOrDefault(timeOfDay, new ArrayList<>()); // чтобы не было исключения.
     }
 
-    public ArrayList<CounterOfTrainings> getCountByCoaches() {
+    public List<CounterOfTrainings> getCountByCoaches() {
 
-        HashMap<Coach, Integer> mapCoachCount = new HashMap<>();
+        Map<Coach, Integer> mapCoachCount = new HashMap<>();
 
         for (DayOfWeek day : timetable.keySet()) {
-            TreeMap<TimeOfDay, ArrayList<TrainingSession>> dayMap = timetable.get(day);
+            Map<TimeOfDay, List<TrainingSession>> dayMap = timetable.get(day);
             if (dayMap != null) {
-                for (Map.Entry<TimeOfDay, ArrayList<TrainingSession>> entry : dayMap.entrySet()) {
+                for (Map.Entry<TimeOfDay, List<TrainingSession>> entry : dayMap.entrySet()) {
                     for (TrainingSession session : entry.getValue()) {
                         Coach coach = session.getCoach();
                         mapCoachCount.put(coach, mapCoachCount.getOrDefault(coach, 0) + 1);
@@ -55,7 +56,7 @@ public class Timetable {
             }
         }
 
-        ArrayList<CounterOfTrainings> list = new ArrayList<>();
+        List<CounterOfTrainings> list = new ArrayList<>();
         for (Map.Entry<Coach, Integer> entry : mapCoachCount.entrySet()) {
             list.add(new CounterOfTrainings(entry.getKey(), entry.getValue()));
         }
@@ -64,3 +65,4 @@ public class Timetable {
         return list;
     }
 }
+

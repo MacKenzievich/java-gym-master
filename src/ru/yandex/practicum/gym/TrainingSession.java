@@ -1,6 +1,6 @@
 package ru.yandex.practicum.gym;
 
-public class TrainingSession {
+public class TrainingSession implements Comparable<TrainingSession> {
 
     //группа
     private Group group;
@@ -33,4 +33,10 @@ public class TrainingSession {
     public TimeOfDay getTimeOfDay() {
         return timeOfDay;
     }
+
+    @Override
+    public int compareTo(TrainingSession o) {
+        return this.timeOfDay.compareTo(o.getTimeOfDay());
+    }
+
 }
