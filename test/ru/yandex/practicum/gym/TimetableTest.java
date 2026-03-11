@@ -23,25 +23,11 @@ public class TimetableTest {
         timetable.addNewTrainingSession(singleTrainingSession);
 
         //Проверить, что за понедельник вернулось одно занятие
-        TreeMap<TimeOfDay, ArrayList<TrainingSession>> trainingSessions =
-                timetable.getTrainingSessionsForDay(DayOfWeek.MONDAY);
-
-        ArrayList<TrainingSession> list = new ArrayList<>();
-        for (ArrayList<TrainingSession> ls : trainingSessions.values()) {
-            list.addAll(ls);
-        }
-
+        List<TrainingSession> list = timetable.getTrainingSessionsForDay(DayOfWeek.MONDAY);
         assertEquals(1, list.size(), "Должно вернуться 1");
 
         //Проверить, что за вторник не вернулось занятий
-        TreeMap<TimeOfDay, ArrayList<TrainingSession>> trainingSessions1 =
-                timetable.getTrainingSessionsForDay(DayOfWeek.TUESDAY);
-
-        ArrayList<TrainingSession> list1 = new ArrayList<>();
-        for (ArrayList<TrainingSession> ls : trainingSessions.values()) {
-            list.addAll(ls);
-        }
-
+        List<TrainingSession> list1 = timetable.getTrainingSessionsForDay(DayOfWeek.TUESDAY);
         assertTrue(list1.isEmpty(), "Должно вернуть true");
     }
 
@@ -70,39 +56,28 @@ public class TimetableTest {
         timetable.addNewTrainingSession(saturdayChildTrainingSession);
 
         // Проверить, что за понедельник вернулось одно занятие
-        TreeMap<TimeOfDay, ArrayList<TrainingSession>> trainingSessionsInMonday =
-                timetable.getTrainingSessionsForDay(DayOfWeek.MONDAY);
+        List<TrainingSession> listMonday = timetable.getTrainingSessionsForDay(DayOfWeek.MONDAY);
 
-        ArrayList<TrainingSession> listMonday = new ArrayList<>();
-
-        for (ArrayList<TrainingSession> ls : trainingSessionsInMonday.values()) {
-            listMonday.addAll(ls);
-        }
         assertEquals(1, listMonday.size(), "Должон вернуться 1");
 
         // Проверить, что за четверг вернулось два занятия в правильном порядке: сначала в 13:00, потом в 20:00
-        TreeMap<TimeOfDay, ArrayList<TrainingSession>> trainingSessionsInThursday =
-                timetable.getTrainingSessionsForDay(DayOfWeek.THURSDAY);
+        List<TrainingSession> listThursday = timetable.getTrainingSessionsForDay(DayOfWeek.THURSDAY);
 
-        ArrayList<TrainingSession> listThursday = new ArrayList<>();
-        for (ArrayList<TrainingSession> ls : trainingSessionsInThursday.values()) {
-            listThursday.addAll(ls);
-        }
         assertEquals(2, listThursday.size(), "Должно вернуться 2");
 
-        List<TimeOfDay> timeList = new ArrayList<>(trainingSessionsInThursday.keySet());
+        List<TimeOfDay> timeList = new ArrayList<>();
+        timeList.add(listThursday.getFirst().getTimeOfDay());
+        timeList.add(listThursday.getLast().getTimeOfDay());
 
         TimeOfDay firstTime = new TimeOfDay(13, 0);
         TimeOfDay secondTime = new TimeOfDay(20, 0);
 
-        assertEquals(firstTime, timeList.get(0));
-        assertEquals(secondTime, timeList.get(1));
-
+        assertEquals(firstTime, timeList.getFirst());
+        assertEquals(secondTime, timeList.getLast());
 
         // Проверить, что за вторник не вернулось занятий
 
-        TreeMap<TimeOfDay, ArrayList<TrainingSession>> trainingSessionsInTuesday =
-                timetable.getTrainingSessionsForDay(DayOfWeek.TUESDAY);
+        List<TrainingSession> trainingSessionsInTuesday = timetable.getTrainingSessionsForDay(DayOfWeek.TUESDAY);
         assertEquals(0, trainingSessionsInTuesday.size());
     }
 
@@ -111,17 +86,25 @@ public class TimetableTest {
         Timetable timetable = new Timetable();
 
         Group group = new Group("Акробатика для детей", Age.CHILD, 60);
+        Group secondGroup = new Group("Акробатика для детей", Age.ADULT, 60);
         Coach coach = new Coach("Васильев", "Николай", "Сергеевич");
         TrainingSession singleTrainingSession = new TrainingSession(group, coach,
+                DayOfWeek.MONDAY, new TimeOfDay(13, 0));
+
+        TrainingSession trainingSession = new TrainingSession(secondGroup, coach,
                 DayOfWeek.MONDAY, new TimeOfDay(13, 0));
 
         timetable.addNewTrainingSession(singleTrainingSession);
 
         //Проверить, что за понедельник в 13:00 вернулось одно занятие
-        ArrayList<TrainingSession> firstList = timetable.getTrainingSessionsForDayAndTime(DayOfWeek.MONDAY, new TimeOfDay(13, 0));
+        List<TrainingSession> firstList = timetable.getTrainingSessionsForDayAndTime(DayOfWeek.MONDAY, new TimeOfDay(13, 0));
         assertEquals(1, firstList.size());
+        //Проверить, что за понедельник в 13:00 вернулось 2 занятия
+        timetable.addNewTrainingSession(trainingSession);
+        List<TrainingSession> thirdList = timetable.getTrainingSessionsForDayAndTime(DayOfWeek.MONDAY, new TimeOfDay(13, 0));
+        assertEquals(2, thirdList.size());
         //Проверить, что за понедельник в 14:00 не вернулось занятий
-        ArrayList<TrainingSession> secondList = timetable.getTrainingSessionsForDayAndTime(DayOfWeek.MONDAY, new TimeOfDay(14, 0));
+        List<TrainingSession> secondList = timetable.getTrainingSessionsForDayAndTime(DayOfWeek.MONDAY, new TimeOfDay(14, 0));
         assertEquals(0, secondList.size());
     }
 
